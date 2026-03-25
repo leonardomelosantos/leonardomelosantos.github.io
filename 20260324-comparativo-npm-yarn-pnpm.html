@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NPM vs Yarn vs PNPM — Comparativo Técnico | FCxLabs Engineering</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --npm:    #CC3534;
+      --yarn:   #2188B6;
+      --pnpm:   #F59E0B;
+      --win:    #10B981;
+      --bg:     #F1F5F9;
+      --card:   #FFFFFF;
+      --text:   #1E293B;
+      --muted:  #64748B;
+      --border: #E2E8F0;
+      --code-bg:#1E293B;
+      --primary:#1E3A5F;
+      --accent: #3B82F6;
+      --radius: 12px;
+      --shadow: 0 2px 16px rgba(0,0,0,.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── HERO ───────────────────────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 60%, #164E63 100%);
+      color: #fff;
+      padding: 64px 40px 56px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 40%, rgba(59,130,246,.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 50px;
+      padding: 4px 16px;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      color: #94A3B8;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 46px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+    .hero h1 span.npm  { color: #F87171; }
+    .hero h1 span.yarn { color: #60A5FA; }
+    .hero h1 span.pnpm { color: #FCD34D; }
+    .hero-sub {
+      font-size: 17px;
+      color: #94A3B8;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #64748B;
+    }
+    .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+    /* ── LAYOUT ─────────────────────────────────────────────────────────── */
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: 32px;
+      padding: 40px 24px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc { display: none; }
+    }
+
+    /* ── TOC ────────────────────────────────────────────────────────────── */
+    .toc {
+      position: sticky;
+      top: 24px;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      border: 1px solid var(--border);
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .toc a {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 5px 8px;
+      border-radius: 6px;
+      transition: all .15s;
+      border-left: 2px solid transparent;
+    }
+    .toc a:hover { color: var(--accent); background: #EFF6FF; border-left-color: var(--accent); }
+
+    /* ── MAIN ───────────────────────────────────────────────────────────── */
+    .main { min-width: 0; }
+
+    /* ── SECTION ────────────────────────────────────────────────────────── */
+    .section {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 40px;
+      margin-bottom: 28px;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EFF6FF;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      padding: 4px 10px;
+      border-radius: 50px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 20px;
+      letter-spacing: -.5px;
+    }
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 28px 0 12px;
+    }
+    h4 { font-size: 15px; font-weight: 600; color: var(--text); margin: 20px 0 8px; }
+    p { margin-bottom: 14px; color: #334155; }
+
+    /* ── TOOL BADGES ────────────────────────────────────────────────────── */
+    .badge-npm  { background: #FEF2F2; color: var(--npm);  font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+    .badge-yarn { background: #EFF6FF; color: var(--yarn); font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+    .badge-pnpm { background: #FFFBEB; color: #B45309;     font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+
+    /* ── CALLOUTS ───────────────────────────────────────────────────────── */
+    .callout {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 14px;
+    }
+    .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .callout-win  { background: #F0FDF4; border-left: 4px solid var(--win); }
+    .callout-info { background: #EFF6FF; border-left: 4px solid var(--accent); }
+    .callout-warn { background: #FFFBEB; border-left: 4px solid var(--pnpm); }
+    .callout strong { display: block; margin-bottom: 4px; }
+
+    /* ── TABLES ─────────────────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; border-radius: 10px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: .3px;
+    }
+    td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #F8FAFC; }
+    .check  { color: var(--win);  font-weight: 700; }
+    .cross  { color: #EF4444;     font-weight: 700; }
+    .partial{ color: var(--pnpm); font-weight: 700; }
+
+    /* ── STARS ──────────────────────────────────────────────────────────── */
+    .stars { color: #FBB200; letter-spacing: 1px; font-size: 16px; }
+    .stars-empty { color: #CBD5E1; font-size: 16px; }
+
+    /* ── CODE ───────────────────────────────────────────────────────────── */
+    pre {
+      background: var(--code-bg);
+      color: #E2E8F0;
+      border-radius: 10px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 16px 0;
+      font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    }
+    code {
+      background: #F1F5F9;
+      color: #BE185D;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+    pre code { background: none; color: inherit; padding: 0; border-radius: 0; font-size: inherit; }
+
+    /* ── CHART CONTAINERS ───────────────────────────────────────────────── */
+    .chart-container {
+      background: #FAFBFC;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+    .chart-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    canvas { display: block; max-width: 100%; }
+
+    /* ── RANKING CARDS ──────────────────────────────────────────────────── */
+    .ranking-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 24px 0; }
+    @media (max-width: 700px) { .ranking-grid { grid-template-columns: 1fr; } }
+    .rank-card {
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      border: 2px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .rank-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+    .rank-1 { border-color: #FBB200; }
+    .rank-1::before { background: linear-gradient(90deg, #F59E0B, #EF4444); }
+    .rank-2 { border-color: #94A3B8; }
+    .rank-2::before { background: linear-gradient(90deg, #94A3B8, #64748B); }
+    .rank-3 { border-color: #CD7F32; }
+    .rank-3::before { background: linear-gradient(90deg, #CD7F32, #92400E); }
+    .rank-medal { font-size: 40px; margin-bottom: 8px; }
+    .rank-tool { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .rank-score { font-size: 32px; font-weight: 900; margin-bottom: 16px; }
+    .rank-1 .rank-score { color: #D97706; }
+    .rank-2 .rank-score { color: #64748B; }
+    .rank-3 .rank-score { color: #92400E; }
+    .rank-reasons { list-style: none; font-size: 13px; color: var(--muted); }
+    .rank-reasons li { padding: 3px 0; }
+    .rank-reasons li::before { content: '→ '; color: var(--accent); }
+
+    /* ── RECOMMENDATION BOX ─────────────────────────────────────────────── */
+    .rec-box {
+      background: linear-gradient(135deg, #0F172A, #1E3A5F);
+      border-radius: var(--radius);
+      padding: 36px;
+      color: #fff;
+      margin: 20px 0;
+    }
+    .rec-box h3 { color: #FCD34D; font-size: 20px; margin-bottom: 16px; }
+    .rec-box p { color: #CBD5E1; }
+    .rec-pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+    .rec-pillar {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .rec-pillar-icon { font-size: 24px; margin-bottom: 8px; }
+    .rec-pillar-title { font-size: 13px; font-weight: 700; color: #FCD34D; margin-bottom: 6px; }
+    .rec-pillar-text  { font-size: 12px; color: #94A3B8; line-height: 1.5; }
+
+    /* ── PHASES ─────────────────────────────────────────────────────────── */
+    .phases { display: grid; gap: 12px; margin: 20px 0; }
+    .phase {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 16px;
+      align-items: center;
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+    .phase-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      background: #EFF6FF;
+      border-radius: 6px;
+      padding: 6px 10px;
+      text-align: center;
+    }
+    .phase-text { font-size: 14px; color: var(--text); }
+    .phase-text strong { display: block; margin-bottom: 3px; }
+
+    /* ── LOCKFILE RULES ─────────────────────────────────────────────────── */
+    .rules { display: grid; gap: 12px; margin: 20px 0; }
+    .rule {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 14px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+    .rule-num {
+      width: 28px; height: 28px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .rule-text { font-size: 14px; color: var(--text); }
+    .rule-text strong { display: block; margin-bottom: 3px; color: var(--primary); }
+
+    /* ── FOOTER ─────────────────────────────────────────────────────────── */
+    .footer {
+      background: var(--primary);
+      color: #94A3B8;
+      text-align: center;
+      padding: 28px;
+      font-size: 13px;
+      margin-top: 40px;
+    }
+    .footer strong { color: #fff; }
+
+    /* ── DIVIDER ────────────────────────────────────────────────────────── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    /* ── LEGEND ─────────────────────────────────────────────────────────── */
+    .legend { display: flex; gap: 20px; flex-wrap: wrap; margin: 12px 0; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+    .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+    /* Timeline SVG wrapper */
+    .svg-wrap { overflow-x: auto; margin: 20px 0; }
+    .svg-wrap svg { min-width: 600px; }
+  </style>
+</head>
+<body>
+
+
+
+<!-- ══════════════════════════════ LAYOUT ════════════════════════════════ -->
+<div class="layout">
+
+  <!-- TOC -->
+  <nav class="toc">
+    <div class="toc-title">Sumário</div>
+    <a href="#intro">1. Introdução</a>
+    <a href="#seguranca">2. Segurança</a>
+    <a href="#popularidade">3. Popularidade</a>
+    <a href="#estabilidade">4. Estabilidade Técnica</a>
+    <a href="#modernizacao">5. Modernização</a>
+    <a href="#performance">6. Performance</a>
+    <a href="#comparativo">7. Tabela Comparativa</a>
+    <a href="#ranking">8. Ranking Final</a>
+    <a href="#recomendacao">9. Recomendação Oficial</a>
+    <a href="#lockfile">10. Versionamento do Lockfile</a>
+    <a href="#conclusao">11. Conclusão</a>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── 1. INTRODUÇÃO ──────────────────────────────────────────────── -->
+    <section class="section" id="intro">
+      <div class="section-label">📖 Introdução</div>
+      <h2>Por que este comparativo importa?</h2>
+      <p>O gerenciador de pacotes é uma das ferramentas mais críticas no dia a dia de qualquer time de desenvolvimento Node.js. Ele é responsável pela instalação de dependências, resolução de conflitos de versão, segurança da supply chain, performance das pipelines de CI/CD e consistência entre ambientes.</p>
+      <p>Este documento avalia de forma técnica e objetiva os três principais gerenciadores — <span class="badge-npm">NPM</span>, <span class="badge-yarn">Yarn</span> e <span class="badge-pnpm">PNPM</span> — com base em cinco critérios essenciais para o contexto corporativo.</p>
+
+      <h3>Linha do Tempo</h3>
+      <div class="svg-wrap">
+        <svg id="timeline-svg" width="700" height="220" viewBox="0 0 700 220"></svg>
+      </div>
+    </section>
+
+    <!-- ── 2. SEGURANÇA ───────────────────────────────────────────────── -->
+    <section class="section" id="seguranca">
+      <div class="section-label">🔒 Critério 1</div>
+      <h2>Segurança</h2>
+      <p>Segurança da supply chain é um dos temas mais críticos do ecossistema Node.js moderno. Avaliamos auditoria de dependências, gestão de vulnerabilidades, confiabilidade do lockfile e histórico de incidentes.</p>
+
+      <h3>Histórico de CVEs e Incidentes — <span class="badge-npm">NPM</span></h3>
+      <p>O NPM é o gerenciador com o maior histórico de incidentes de segurança por ser o mais adotado e, portanto, o maior alvo de ataques à supply chain.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ano</th><th>Incidente</th><th>Impacto</th></tr></thead>
+          <tbody>
+            <tr><td>2021</td><td><code>ua-parser-js</code> sequestrado</td><td>Versões maliciosas publicadas no registro NPM</td></tr>
+            <tr><td>2022</td><td><code>node-ipc</code> protestware</td><td>Código destrutivo ativado por geolocalização</td></tr>
+            <tr><td>2022</td><td>Vazamento OAuth GitHub/Heroku</td><td>Tokens de acesso expostos via integração NPM</td></tr>
+            <tr><td>2023</td><td>Typosquatting em massa</td><td>Múltiplos pacotes falsos com nomes similares</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Proteção contra Phantom Dependencies — diferencial do <span class="badge-pnpm">PNPM</span></h3>
+      <p>O <em>strict mode</em> do PNPM previne um vetor de ataque ignorado por NPM e Yarn: o acesso não autorizado a dependências não declaradas (<em>phantom dependencies</em>).</p>
+      <div class="svg-wrap">
+        <svg id="phantom-svg" width="680" height="200" viewBox="0 0 680 200"></svg>
+      </div>
+
+      <h3>Comparativo de Funcionalidades de Segurança</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Recurso</th><th>NPM</th><th>Yarn</th><th>PNPM</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Lockfile com checksums</td>
+              <td class="partial">v7+</td>
+              <td class="check">v1+</td>
+              <td class="check">v1+</td>
+            </tr>
+            <tr>
+              <td>Auditoria de vulnerabilidades</td>
+              <td class="check">Nativo</td>
+              <td class="check">Nativo</td>
+              <td class="check">Nativo</td>
+            </tr>
+            <tr>
+              <td>Proteção contra phantom deps</td>
+              <td class="cross">Não</td>
+              <td class="partial">Parcial</td>
+              <td class="check">Sim</td>
+            </tr>
+            <tr>
+              <td>Isolamento estrito de dependências</td>
+              <td class="cross">Não</td>
+              <td class="cross">Não</td>
+              <td class="check">Sim</td>
+            </tr>
+            <tr>
+              <td>Histórico de incidentes no tool</td>
+              <td class="cross">Alto</td>
+              <td class="check">Baixo</td>
+              <td class="check">Baixo</td>
+            </tr>
+            <tr>
+              <td>Content-addressable store (CAS)</td>
+              <td class="cross">Não</td>
+              <td class="cross">Não</td>
+              <td class="check">Sim</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-win">
+        <div class="callout-icon">🏆</div>
+        <div><strong>Vencedor em Segurança: PNPM</strong> A abordagem de strict mode e content-addressable store coloca o PNPM em posição de destaque. O NPM tem o histórico mais preocupante de incidentes de supply chain.</div>
+      </div>
+    </section>
+
+    <!-- ── 3. POPULARIDADE ────────────────────────────────────────────── -->
+    <section class="section" id="popularidade">
+      <div class="section-label">📊 Critério 2</div>
+      <h2>Popularidade</h2>
+      <p>A popularidade influencia diretamente a disponibilidade de recursos, suporte da comunidade e compatibilidade com ferramentas de terceiros.</p>
+
+      <h3>Downloads Semanais (estimativa Q1 2026)</h3>
+      <div class="chart-container">
+        <div class="chart-title">Downloads semanais — npmjs.com</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--npm)"></div> NPM</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--yarn)"></div> Yarn</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--pnpm)"></div> PNPM</div>
+        </div>
+        <canvas id="chart-downloads" width="600" height="160"></canvas>
+      </div>
+
+      <h3>Crescimento Relativo 2020–2026</h3>
+      <div class="chart-container">
+        <div class="chart-title">Crescimento de downloads (base 100 = Jan 2020)</div>
+        <canvas id="chart-growth" width="600" height="160"></canvas>
+      </div>
+
+      <h3>Adoção em Projetos Open Source Relevantes</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Projeto</th><th>Gerenciador adotado</th></tr></thead>
+          <tbody>
+            <tr><td>Vue.js</td><td><span class="badge-pnpm">PNPM</span></td></tr>
+            <tr><td>Nuxt.js</td><td><span class="badge-pnpm">PNPM</span></td></tr>
+            <tr><td>Vite</td><td><span class="badge-pnpm">PNPM</span></td></tr>
+            <tr><td>TurboRepo (templates)</td><td><span class="badge-pnpm">PNPM</span></td></tr>
+            <tr><td>tRPC</td><td><span class="badge-pnpm">PNPM</span></td></tr>
+            <tr><td>Nx</td><td><span class="badge-npm">NPM</span> / <span class="badge-pnpm">PNPM</span></td></tr>
+            <tr><td>Next.js</td><td><span class="badge-npm">NPM</span> / <span class="badge-pnpm">PNPM</span></td></tr>
+            <tr><td>Create React App</td><td><span class="badge-npm">NPM</span></td></tr>
+            <tr><td>Angular CLI</td><td><span class="badge-npm">NPM</span></td></tr>
+            <tr><td>Prisma</td><td><span class="badge-npm">NPM</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-win">
+        <div class="callout-icon">🏆</div>
+        <div><strong>Vencedor em Popularidade: NPM</strong> Ainda lidera em volume absoluto. Porém, o crescimento do PNPM (+620%) é o mais expressivo do período e está ultrapassando o Yarn rapidamente.</div>
+      </div>
+    </section>
+
+    <!-- ── 4. ESTABILIDADE TÉCNICA ─────────────────────────────────────── -->
+    <section class="section" id="estabilidade">
+      <div class="section-label">🏗 Critério 3</div>
+      <h2>Estabilidade Técnica</h2>
+      <p>Avaliamos maturidade do projeto, frequência de releases, breaking changes e suporte a monorepos.</p>
+
+      <h3>Fragmentação do Lockfile — <span class="badge-npm">NPM</span></h3>
+      <div class="svg-wrap">
+        <svg id="lockfile-frag-svg" width="660" height="150" viewBox="0 0 660 150"></svg>
+      </div>
+
+      <h3>Fragmentação v1 vs Berry — <span class="badge-yarn">Yarn</span></h3>
+      <div class="svg-wrap">
+        <svg id="yarn-frag-svg" width="660" height="130" viewBox="0 0 660 130"></svg>
+      </div>
+
+      <h3>Comparativo de Estabilidade</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Critério</th><th>NPM</th><th>Yarn</th><th>PNPM</th></tr></thead>
+          <tbody>
+            <tr><td>Anos de existência</td><td>15+</td><td>8+</td><td>7+</td></tr>
+            <tr>
+              <td>Fragmentação interna</td>
+              <td class="cross">Lockfile v1/v2/v3</td>
+              <td class="cross">v1 vs Berry</td>
+              <td class="check">Baixa</td>
+            </tr>
+            <tr>
+              <td>Suporte a monorepos</td>
+              <td class="partial">Básico</td>
+              <td class="check">Bom</td>
+              <td class="check">Excelente</td>
+            </tr>
+            <tr>
+              <td>Breaking changes entre major</td>
+              <td class="partial">Moderado</td>
+              <td class="cross">Alto</td>
+              <td class="check">Baixo</td>
+            </tr>
+            <tr>
+              <td>Bundled com Node.js</td>
+              <td class="check">Sim</td>
+              <td class="cross">Não</td>
+              <td class="cross">Não</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-win">
+        <div class="callout-icon">🏆</div>
+        <div><strong>Vencedor em Estabilidade: PNPM</strong> Menos fragmentação, melhor suporte a monorepos e histórico de migrations menos traumáticas.</div>
+      </div>
+    </section>
+
+    <!-- ── 5. MODERNIZAÇÃO ────────────────────────────────────────────── -->
+    <section class="section" id="modernizacao">
+      <div class="section-label">🚀 Critério 4</div>
+      <h2>Modernização</h2>
+      <p>Avaliamos suporte a workspaces, Plug'n'Play, recursos modernos do ecossistema Node.js e recursos de vanguarda como Catalogs.</p>
+
+      <h3>Suporte a Workspaces / Monorepos</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Recurso</th><th>NPM</th><th>Yarn</th><th>PNPM</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Workspaces nativos</td>
+              <td class="partial">v7+</td>
+              <td class="check">v1+</td>
+              <td class="check">v1+</td>
+            </tr>
+            <tr>
+              <td>Protocolo <code>workspace:</code></td>
+              <td class="cross">Não</td>
+              <td class="check">Sim</td>
+              <td class="check">Sim</td>
+            </tr>
+            <tr>
+              <td>Filtros <code>--filter</code></td>
+              <td class="cross">Não</td>
+              <td class="check">Sim</td>
+              <td class="check">Sim</td>
+            </tr>
+            <tr>
+              <td>Instalação paralela nos workspaces</td>
+              <td class="cross">Não</td>
+              <td class="partial">Parcial</td>
+              <td class="check">Sim</td>
+            </tr>
+            <tr>
+              <td>Catalogs de versão (v9+)</td>
+              <td class="cross">Não</td>
+              <td class="cross">Não</td>
+              <td class="check">Sim</td>
+            </tr>
+            <tr>
+              <td>Patch de dependências</td>
+              <td class="cross">Não</td>
+              <td class="check">Sim</td>
+              <td class="check">Sim</td>
+            </tr>
+            <tr>
+              <td>Suporte Plug'n'Play</td>
+              <td class="cross">Não</td>
+              <td class="check">Padrão</td>
+              <td class="check">Opcional</td>
+            </tr>
+            <tr>
+              <td>Zero-installs</td>
+              <td class="cross">Não</td>
+              <td class="check">Sim</td>
+              <td class="partial">Parcial</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>PNPM Catalogs — Recurso de Vanguarda</h3>
+      <p>O Catalogs (PNPM v9+) permite definir versões canônicas de dependências compartilhadas no workspace raiz, garantindo consistência entre todos os pacotes do monorepo.</p>
+      <pre><code class="language-yaml"># pnpm-workspace.yaml
+packages:
+  - 'packages/*'
+catalogs:
+  default:
+    react: ^18.3.0
+    typescript: ^5.4.0
+    zod: ^3.22.0
+
+# packages/app/package.json
+{
+  "dependencies": {
+    "react": "catalog:",      # ← usa versão do catálogo
+    "zod":   "catalog:"       # ← consistência garantida
+  }
+}</code></pre>
+
+      <div class="callout callout-win">
+        <div class="callout-icon">🏆</div>
+        <div><strong>Vencedor em Modernização: PNPM</strong> Catalogs, filtros avançados e node-linker configurável colocam o PNPM na vanguarda. O Yarn Berry é inovador, mas a fragmentação com o v1 prejudica a adoção.</div>
+      </div>
+    </section>
+
+    <!-- ── 6. PERFORMANCE ─────────────────────────────────────────────── -->
+    <section class="section" id="performance">
+      <div class="section-label">⚡ Critério 5</div>
+      <h2>Performance</h2>
+      <p>Performance é o critério mais visível no dia a dia, especialmente em pipelines de CI/CD onde o tempo de <code>install</code> impacta diretamente o lead time de deploys.</p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">ℹ️</div>
+        <div><strong>Metodologia</strong> Benchmarks baseados em testes da comunidade (pnpm.io, Nx team, estudos de mercado) para projeto médio (~500 dependências). Valores aproximados — variam por hardware, rede e tamanho do projeto.</div>
+      </div>
+
+      <h3>Velocidade de Instalação — Cache Frio</h3>
+      <div class="chart-container">
+        <div class="chart-title">Instalação sem cache (node_modules vazio, lockfile presente) — em segundos</div>
+        <canvas id="chart-cold" width="600" height="160"></canvas>
+      </div>
+
+      <h3>Velocidade de Instalação — Cache Quente</h3>
+      <div class="chart-container">
+        <div class="chart-title">Instalação com cache populado (store/cache existente) — em segundos</div>
+        <canvas id="chart-warm" width="600" height="160"></canvas>
+      </div>
+
+      <h3>Uso de Disco — 5 Projetos Node.js</h3>
+      <p>Esta é a diferença mais dramática. O PNPM usa um <strong>store global</strong> com hard links — cada versão de cada pacote é armazenada <strong>uma única vez</strong>, independentemente de quantos projetos a usam.</p>
+      <div class="chart-container">
+        <div class="chart-title">Uso total de disco — 5 projetos Node.js no mesmo computador</div>
+        <canvas id="chart-disk" width="600" height="160"></canvas>
+      </div>
+
+      <div class="svg-wrap">
+        <svg id="hardlink-svg" width="680" height="200" viewBox="0 0 680 200"></svg>
+      </div>
+
+      <h3>Cache em CI/CD — Configuração GitLab</h3>
+      <pre><code class="language-yaml"># .gitlab-ci.yml — configuração de cache recomendada com PNPM
+
+variables:
+  PNPM_HOME: "${CI_PROJECT_DIR}/.pnpm-store"
+
+cache:
+  key:
+    files:
+      - pnpm-lock.yaml
+  paths:
+    - .pnpm-store/
+
+install:
+  script:
+    - corepack enable
+    - pnpm install --frozen-lockfile</code></pre>
+
+      <div class="callout callout-win">
+        <div class="callout-icon">🏆</div>
+        <div><strong>Vencedor em Performance: PNPM</strong> Hard links + store global + instalação paralela fazem do PNPM o mais eficiente em todos os cenários medidos.</div>
+      </div>
+    </section>
+
+    <!-- ── 7. TABELA COMPARATIVA ──────────────────────────────────────── -->
+    <section class="section" id="comparativo">
+      <div class="section-label">📋 Síntese</div>
+      <h2>Tabela Comparativa Consolidada</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Critério</th>
+              <th>Peso</th>
+              <th>NPM</th>
+              <th>Yarn</th>
+              <th>PNPM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Segurança</strong></td>
+              <td>25%</td>
+              <td><span class="stars">★★★</span><span class="stars-empty">★★</span> 3/5</td>
+              <td><span class="stars">★★★★</span><span class="stars-empty">★</span> 4/5</td>
+              <td><span class="stars">★★★★★</span> 5/5</td>
+            </tr>
+            <tr>
+              <td><strong>Popularidade</strong></td>
+              <td>15%</td>
+              <td><span class="stars">★★★★★</span> 5/5</td>
+              <td><span class="stars">★★★</span><span class="stars-empty">★★</span> 3/5</td>
+              <td><span class="stars">★★★★</span><span class="stars-empty">★</span> 4/5</td>
+            </tr>
+            <tr>
+              <td><strong>Estabilidade Técnica</strong></td>
+              <td>25%</td>
+              <td><span class="stars">★★★</span><span class="stars-empty">★★</span> 3/5</td>
+              <td><span class="stars">★★★</span><span class="stars-empty">★★</span> 3/5</td>
+              <td><span class="stars">★★★★★</span> 5/5</td>
+            </tr>
+            <tr>
+              <td><strong>Modernização</strong></td>
+              <td>15%</td>
+              <td><span class="stars">★★</span><span class="stars-empty">★★★</span> 2/5</td>
+              <td><span class="stars">★★★★</span><span class="stars-empty">★</span> 4/5</td>
+              <td><span class="stars">★★★★★</span> 5/5</td>
+            </tr>
+            <tr>
+              <td><strong>Performance</strong></td>
+              <td>20%</td>
+              <td><span class="stars">★★</span><span class="stars-empty">★★★</span> 2/5</td>
+              <td><span class="stars">★★★</span><span class="stars-empty">★★</span> 3/5</td>
+              <td><span class="stars">★★★★★</span> 5/5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Radar — Visão Geral por Critério</h3>
+      <div class="chart-container" style="display:flex; flex-direction:column; align-items:center;">
+        <div class="chart-title">Comparativo por dimensão (escala 0–5)</div>
+        <div class="legend" style="justify-content:center; margin-bottom:8px;">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--npm)"></div> NPM</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--yarn)"></div> Yarn</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--pnpm)"></div> PNPM</div>
+        </div>
+        <canvas id="chart-radar" width="420" height="380"></canvas>
+      </div>
+
+      <h3>Pontuação Final Ponderada</h3>
+      <div class="chart-container">
+        <div class="chart-title">Pontuação total (escala 0–5)</div>
+        <canvas id="chart-final" width="600" height="160"></canvas>
+      </div>
+    </section>
+
+    <!-- ── 8. RANKING ─────────────────────────────────────────────────── -->
+    <section class="section" id="ranking">
+      <div class="section-label">🏅 Resultado</div>
+      <h2>Ranking Final</h2>
+
+      <div class="ranking-grid">
+        <div class="rank-card rank-1">
+          <div class="rank-medal">🥇</div>
+          <div class="rank-tool"><span class="badge-pnpm">PNPM</span></div>
+          <div class="rank-score">4.85<small style="font-size:16px;color:#94A3B8">/5.00</small></div>
+          <ul class="rank-reasons">
+            <li>Melhor em 4 dos 5 critérios</li>
+            <li>Strict mode de segurança único</li>
+            <li>Store global com hard links</li>
+            <li>Referência em monorepos</li>
+            <li>Alinhado com projetos modernos</li>
+          </ul>
+        </div>
+        <div class="rank-card rank-2">
+          <div class="rank-medal">🥈</div>
+          <div class="rank-tool"><span class="badge-yarn">Yarn</span></div>
+          <div class="rank-score">3.40<small style="font-size:16px;color:#94A3B8">/5.00</small></div>
+          <ul class="rank-reasons">
+            <li>Boa segurança via checksums</li>
+            <li>PnP é tecnicamente inovador</li>
+            <li>Zero-installs para offline CI</li>
+            <li>Fragmentação v1/Berry prejudica</li>
+            <li>Crescimento desacelerado</li>
+          </ul>
+        </div>
+        <div class="rank-card rank-3">
+          <div class="rank-medal">🥉</div>
+          <div class="rank-tool"><span class="badge-npm">NPM</span></div>
+          <div class="rank-score">2.95<small style="font-size:16px;color:#94A3B8">/5.00</small></div>
+          <ul class="rank-reasons">
+            <li>Bundled com Node.js</li>
+            <li>Maior base de usuários absoluta</li>
+            <li>Menor curva de aprendizado</li>
+            <li>Menor performance em CI</li>
+            <li>Sem proteção phantom deps</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 9. RECOMENDAÇÃO ────────────────────────────────────────────── -->
+    <section class="section" id="recomendacao">
+      <div class="section-label">✅ Decisão Oficial</div>
+      <h2>Recomendação Oficial</h2>
+
+      <div class="rec-box">
+        <h3>O gerenciador de pacotes padrão recomendado para os times de desenvolvimento do FCxLabs é o PNPM.</h3>
+        <p>A recomendação é fundamentada em cinco pilares técnicos que impactam diretamente a segurança, produtividade e custo operacional da engenharia.</p>
+        <div class="rec-pillars">
+          <div class="rec-pillar">
+            <div class="rec-pillar-icon">🔒</div>
+            <div class="rec-pillar-title">Segurança por Padrão</div>
+            <div class="rec-pillar-text">Strict mode previne phantom dependencies — vetor de ataque ignorado por NPM e Yarn</div>
+          </div>
+          <div class="rec-pillar">
+            <div class="rec-pillar-icon">⚡</div>
+            <div class="rec-pillar-title">CI/CD mais Rápido</div>
+            <div class="rec-pillar-text">30–60% mais rápido que NPM em cache quente — impacto direto no lead time</div>
+          </div>
+          <div class="rec-pillar">
+            <div class="rec-pillar-icon">💾</div>
+            <div class="rec-pillar-title">Eficiência de Disco</div>
+            <div class="rec-pillar-text">Hard links reduzem uso de disco em até 70% em ambientes multi-projeto</div>
+          </div>
+          <div class="rec-pillar">
+            <div class="rec-pillar-icon">🏗</div>
+            <div class="rec-pillar-title">Monorepo de Classe Mundial</div>
+            <div class="rec-pillar-text">Filtros, workspace: protocol e Catalogs são referência no ecossistema</div>
+          </div>
+          <div class="rec-pillar">
+            <div class="rec-pillar-icon">🌐</div>
+            <div class="rec-pillar-title">Ecossistema Moderno</div>
+            <div class="rec-pillar-text">Vite, Vue, Nuxt, tRPC — os projetos mais modernos adotaram PNPM</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Plano de Adoção</h3>
+      <div class="phases">
+        <div class="phase">
+          <div class="phase-num">Fase 1<br><small>Imediato</small></div>
+          <div class="phase-text">
+            <strong>Novos projetos</strong>
+            Todo projeto criado a partir desta data deve usar PNPM. Templates e scaffolding atualizados.
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">Fase 2<br><small>90 dias</small></div>
+          <div class="phase-text">
+            <strong>Projetos ativos em NPM</strong>
+            Migrar projetos com maior volume de CI. Seguir roteiro de migração abaixo.
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">Fase 3<br><small>180 dias</small></div>
+          <div class="phase-text">
+            <strong>Legado e manutenção</strong>
+            Avaliar projetos em manutenção caso a caso. Projetos Yarn v1 sem novas features podem permanecer.
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">Fase 4<br><small>Contínuo</small></div>
+          <div class="phase-text">
+            <strong>Governança</strong>
+            Pipeline check para garantir uso do PNPM. Verificação no CLAUDE.md de cada projeto.
+          </div>
+        </div>
+      </div>
+
+      <h3>Roteiro de Migração NPM → PNPM</h3>
+      <pre><code class="language-bash"># 1. Instalar PNPM via Corepack (recomendado — já incluído no Node.js >= 16.10)
+corepack enable
+corepack prepare pnpm@latest --activate
+
+# 2. Remover node_modules e lockfile antigo
+rm -rf node_modules package-lock.json
+
+# 3. Importar do package-lock.json e gerar o pnpm-lock.yaml
+pnpm import   # importa do package-lock.json se ainda existir
+# ou instalar do zero:
+pnpm install
+
+# 4. Atualizar scripts de CI/CD
+# ANTES: npm ci
+# DEPOIS: pnpm install --frozen-lockfile
+
+# 5. Declarar a versão do gerenciador no package.json (boa prática)
+# "packageManager": "pnpm@9.x.x"
+
+# 6. Commitar o pnpm-lock.yaml
+git add pnpm-lock.yaml .npmrc
+git commit -m "chore: migra para PNPM"</code></pre>
+    </section>
+
+    <!-- ── 10. LOCKFILE ───────────────────────────────────────────────── -->
+    <section class="section" id="lockfile">
+      <div class="section-label">🔏 Boas Práticas</div>
+      <h2>Versionamento do Lockfile</h2>
+
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div><strong>Recomendação: versionar o lockfile é obrigatório</strong>, independentemente do gerenciador de pacotes utilizado.</div>
+      </div>
+
+      <h3>Por que versionar o lockfile?</h3>
+      <div class="svg-wrap">
+        <svg id="lockfile-why-svg" width="680" height="210" viewBox="0 0 680 210"></svg>
+      </div>
+
+      <h3>Qual arquivo versionar?</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Gerenciador</th><th>Arquivo</th><th>Versionar?</th></tr></thead>
+          <tbody>
+            <tr><td>NPM</td><td><code>package-lock.json</code></td><td class="check">Sim, sempre</td></tr>
+            <tr><td>Yarn v1</td><td><code>yarn.lock</code></td><td class="check">Sim, sempre</td></tr>
+            <tr><td>Yarn Berry</td><td><code>yarn.lock</code></td><td class="check">Sim, sempre</td></tr>
+            <tr><td>PNPM</td><td><code>pnpm-lock.yaml</code></td><td class="check">Sim, sempre</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Boas Práticas</h3>
+      <div class="rules">
+        <div class="rule">
+          <div class="rule-num">1</div>
+          <div class="rule-text"><strong>Nunca edite o lockfile manualmente</strong> Sempre use os comandos do gerenciador (<code>pnpm add</code>, <code>pnpm update</code>).</div>
+        </div>
+        <div class="rule">
+          <div class="rule-num">2</div>
+          <div class="rule-text"><strong>Use <code>--frozen-lockfile</code> em CI</strong> Garante que o CI falhe se o lockfile estiver desatualizado em relação ao <code>package.json</code>.</div>
+        </div>
+        <div class="rule">
+          <div class="rule-num">3</div>
+          <div class="rule-text"><strong>Revise mudanças no lockfile em code review</strong> Adições inesperadas de dependências transitivas podem indicar problemas de segurança.</div>
+        </div>
+        <div class="rule">
+          <div class="rule-num">4</div>
+          <div class="rule-text"><strong>Atualize dependências deliberadamente</strong> Use <code>pnpm update --interactive</code> para controle granular sobre o que está sendo atualizado.</div>
+        </div>
+        <div class="rule">
+          <div class="rule-num">5</div>
+          <div class="rule-text"><strong>Configure Renovate ou Dependabot</strong> Automação de PRs para atualizações de dependências com CI como guardião de regressões.</div>
+        </div>
+      </div>
+
+      <h3>Resolução de Conflitos no Lockfile</h3>
+      <pre><code class="language-bash"># ❌ ERRADO: nunca resolva conflitos editando o lockfile manualmente
+
+# ✅ CORRETO: aceite o package.json correto e regenere o lockfile
+git checkout their-version -- package.json   # aceita a versão desejada
+pnpm install                                  # regenera o lockfile
+git add pnpm-lock.yaml
+git commit -m "chore: resolve conflito do lockfile"</code></pre>
+    </section>
+
+    <!-- ── 11. CONCLUSÃO ─────────────────────────────────────────────── -->
+    <section class="section" id="conclusao">
+      <div class="section-label">📌 Conclusão</div>
+      <h2>Conclusão</h2>
+      <p>A análise técnica demonstra que o ecossistema de gerenciamento de pacotes Node.js evoluiu significativamente, e a escolha da ferramenta certa tem impacto direto em segurança, produtividade e custo operacional.</p>
+      <p>O <span class="badge-pnpm">PNPM</span> emerge como a escolha superior para o contexto do FCxLabs, combinando a melhor performance, maior rigor de segurança, suporte maduro a monorepos e alinhamento com o estado da arte do ecossistema Node.js moderno.</p>
+      <p>O <strong>versionamento do lockfile</strong> é inegociável e deve ser tratado como um artefato de primeira classe no controle de versão, com a mesma importância do <code>package.json</code> e do código-fonte.</p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">📅</div>
+        <div><strong>Revisão recomendada</strong> Semestral ou a cada major release dos gerenciadores avaliados. Próxima revisão sugerida: Setembro de 2026.</div>
+      </div>
+    </section>
+
+  </main>
+</div><!-- /layout -->
+
+<footer class="footer">
+  <strong>FCxLabs Engineering</strong> · Documento técnico elaborado em Março de 2026 ·
+  Revisão semestral recomendada
+</footer>
+
+<!-- ══════════════════════════════ SCRIPTS ════════════════════════════════ -->
+<script>
+// ─── Utilidades ──────────────────────────────────────────────────────────────
+const NPM_C  = '#CC3534';
+const YARN_C = '#2188B6';
+const PNPM_C = '#F59E0B';
+
+function dpr() { return window.devicePixelRatio || 1; }
+
+function setupCanvas(id, w, h) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const r = dpr();
+  el.width  = w * r;
+  el.height = h * r;
+  el.style.width  = w + 'px';
+  el.style.height = h + 'px';
+  const ctx = el.getContext('2d');
+  ctx.scale(r, r);
+  return ctx;
+}
+
+// ─── Horizontal Bar Chart ────────────────────────────────────────────────────
+function drawHBars(id, items, maxVal, unit, suffix) {
+  const W = 600, barH = 36, gap = 16, padL = 70, padR = 90, padT = 16, padB = 16;
+  const H = padT + padB + items.length * (barH + gap) - gap;
+  const ctx = setupCanvas(id, W, H);
+  if (!ctx) return;
+
+  const chartW = W - padL - padR;
+  ctx.clearRect(0, 0, W, H);
+
+  // grid lines
+  for (let g = 0; g <= 4; g++) {
+    const x = padL + (g / 4) * chartW;
+    ctx.beginPath();
+    ctx.strokeStyle = '#E2E8F0';
+    ctx.lineWidth = 1;
+    ctx.moveTo(x, padT - 8);
+    ctx.lineTo(x, H - padB + 4);
+    ctx.stroke();
+  }
+
+  items.forEach((item, i) => {
+    const y = padT + i * (barH + gap);
+    const barW = (item.value / maxVal) * chartW;
+
+    // shadow
+    ctx.shadowColor = item.color + '44';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 2;
+
+    // bar
+    ctx.fillStyle = item.color;
+    roundRect(ctx, padL, y, barW, barH, 5);
+    ctx.fill();
+
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // label
+    ctx.fillStyle = '#1E293B';
+    ctx.font = '700 13px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.label, padL - 8, y + barH / 2);
+
+    // value
+    ctx.fillStyle = '#1E293B';
+    ctx.font = '600 13px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'left';
+    const valStr = item.value + (unit || '') + (suffix || '');
+    ctx.fillText(valStr, padL + barW + 8, y + barH / 2);
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// ─── Radar Chart ─────────────────────────────────────────────────────────────
+function drawRadar(id) {
+  const W = 420, H = 380;
+  const ctx = setupCanvas(id, W, H);
+  if (!ctx) return;
+
+  const cx = 210, cy = 190, maxR = 130;
+  const labels   = ['Segurança', 'Popularidade', 'Estabilidade', 'Modernização', 'Performance'];
+  const N = labels.length;
+
+  const datasets = [
+    { label: 'NPM',  color: NPM_C,  scores: [3, 5, 3, 2, 2] },
+    { label: 'Yarn', color: YARN_C, scores: [4, 3, 3, 4, 3] },
+    { label: 'PNPM', color: PNPM_C, scores: [5, 4, 5, 5, 5] },
+  ];
+
+  function angleOf(i) { return -Math.PI / 2 + (2 * Math.PI / N) * i; }
+  function point(i, score) {
+    const a = angleOf(i);
+    const r = (score / 5) * maxR;
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  }
+
+  // grid polygons
+  for (let level = 1; level <= 5; level++) {
+    ctx.beginPath();
+    for (let i = 0; i < N; i++) {
+      const a = angleOf(i);
+      const r = (level / 5) * maxR;
+      const x = cx + r * Math.cos(a);
+      const y = cy + r * Math.sin(a);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = level === 5 ? '#CBD5E1' : '#E2E8F0';
+    ctx.lineWidth = level === 5 ? 1.5 : 1;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(248,250,252,0.5)';
+    ctx.fill();
+
+    // level label
+    ctx.fillStyle = '#94A3B8';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(level, cx + 3, cy - (level / 5) * maxR - 2);
+  }
+
+  // axis lines
+  for (let i = 0; i < N; i++) {
+    const a = angleOf(i);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + maxR * Math.cos(a), cy + maxR * Math.sin(a));
+    ctx.strokeStyle = '#CBD5E1';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // axis labels
+  ctx.fillStyle = '#1E293B';
+  ctx.font = '700 12px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < N; i++) {
+    const a = angleOf(i);
+    const lx = cx + (maxR + 22) * Math.cos(a);
+    const ly = cy + (maxR + 22) * Math.sin(a);
+    ctx.textAlign = Math.cos(a) > 0.1 ? 'left' : Math.cos(a) < -0.1 ? 'right' : 'center';
+    ctx.fillText(labels[i], lx, ly);
+  }
+
+  // datasets
+  datasets.forEach(ds => {
+    ctx.beginPath();
+    for (let i = 0; i < N; i++) {
+      const p = point(i, ds.scores[i]);
+      i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = ds.color + '28';
+    ctx.fill();
+    ctx.strokeStyle = ds.color;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // dots
+    for (let i = 0; i < N; i++) {
+      const p = point(i, ds.scores[i]);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = ds.color;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  });
+}
+
+// ─── SVG Timeline ────────────────────────────────────────────────────────────
+function drawTimeline() {
+  const svg = document.getElementById('timeline-svg');
+  if (!svg) return;
+
+  const events = [
+    { year: 2010, label: 'NPM v1.0', color: NPM_C, y: 60 },
+    { year: 2016, label: 'Yarn v1.0', color: YARN_C, y: 120 },
+    { year: 2017, label: 'PNPM v1.0', color: PNPM_C, y: 60 },
+    { year: 2020, label: 'NPM v7 / Yarn Berry', color: NPM_C, y: 120 },
+    { year: 2022, label: 'PNPM v7 / NPM v9', color: PNPM_C, y: 60 },
+    { year: 2024, label: 'PNPM v9 / Yarn v4 / NPM v10', color: '#10B981', y: 120 },
+  ];
+
+  const pad = 40;
+  const W = 700, H = 220;
+  const lineY = 110;
+  const minYear = 2009, maxYear = 2025;
+  const xScale = (y) => pad + ((y - minYear) / (maxYear - minYear)) * (W - 2 * pad);
+
+  let html = '';
+
+  // axis line
+  html += `<line x1="${pad}" y1="${lineY}" x2="${W - pad}" y2="${lineY}" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>`;
+
+  // year ticks
+  for (let y = 2010; y <= 2025; y += 2) {
+    const x = xScale(y);
+    html += `<line x1="${x}" y1="${lineY - 6}" x2="${x}" y2="${lineY + 6}" stroke="#CBD5E1" stroke-width="1.5"/>`;
+    html += `<text x="${x}" y="${lineY + 20}" text-anchor="middle" fill="#94A3B8" font-size="11" font-family="sans-serif">${y}</text>`;
+  }
+
+  events.forEach(ev => {
+    const x = xScale(ev.year);
+    const aboveAxis = ev.y < lineY;
+    const cy2 = aboveAxis ? lineY - 10 : lineY + 10;
+    const textY = aboveAxis ? ev.y - 10 : ev.y + 20;
+
+    html += `<line x1="${x}" y1="${cy2}" x2="${x}" y2="${ev.y}" stroke="${ev.color}" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+    html += `<circle cx="${x}" cy="${lineY}" r="6" fill="${ev.color}" stroke="white" stroke-width="2"/>`;
+
+    const labelX = Math.min(Math.max(x, 60), W - 60);
+    html += `<rect x="${labelX - 60}" y="${aboveAxis ? ev.y - 28 : ev.y}" width="120" height="24" rx="5" fill="${ev.color}22" stroke="${ev.color}" stroke-width="1"/>`;
+    html += `<text x="${labelX}" y="${aboveAxis ? ev.y - 10 : ev.y + 16}" text-anchor="middle" fill="${ev.color}" font-size="11" font-weight="700" font-family="sans-serif">${ev.label}</text>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+// ─── SVG Phantom Deps ─────────────────────────────────────────────────────────
+function drawPhantom() {
+  const svg = document.getElementById('phantom-svg');
+  if (!svg) return;
+
+  const html = `
+    <!-- NPM/Yarn side -->
+    <rect x="20" y="10" width="280" height="175" rx="8" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.5"/>
+    <text x="160" y="32" text-anchor="middle" font-weight="700" font-size="13" fill="${NPM_C}" font-family="sans-serif">NPM / Yarn — Hoisting</text>
+    <rect x="40"  y="44" width="120" height="24" rx="4" fill="${NPM_C}22" stroke="${NPM_C}" stroke-width="1"/>
+    <text x="100" y="60" text-anchor="middle" font-size="12" fill="${NPM_C}" font-family="sans-serif">node_modules/</text>
+    <rect x="60"  y="78" width="100" height="22" rx="4" fill="${NPM_C}22" stroke="${NPM_C}" stroke-width="1"/>
+    <text x="110" y="93" text-anchor="middle" font-size="11" fill="${NPM_C}" font-family="sans-serif">pacote-A/</text>
+    <rect x="80"  y="110" width="90" height="22" rx="4" fill="${NPM_C}22" stroke="${NPM_C}" stroke-width="1"/>
+    <text x="125" y="125" text-anchor="middle" font-size="11" fill="${NPM_C}" font-family="sans-serif">pacote-B/ (dep)</text>
+    <rect x="60"  y="142" width="100" height="22" rx="4" fill="#FCA5A5" stroke="${NPM_C}" stroke-width="1.5"/>
+    <text x="110" y="157" text-anchor="middle" font-size="11" fill="${NPM_C}" font-weight="700" font-family="sans-serif">pacote-B/ (hoist!)</text>
+    <text x="160" y="178" text-anchor="middle" font-size="10" fill="#EF4444" font-family="sans-serif">⚠ acesso fantasma possível</text>
+
+    <!-- PNPM side -->
+    <rect x="360" y="10" width="280" height="175" rx="8" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5"/>
+    <text x="500" y="32" text-anchor="middle" font-weight="700" font-size="13" fill="#059669" font-family="sans-serif">PNPM — Strict Isolation</text>
+    <rect x="380" y="44" width="120" height="24" rx="4" fill="#D1FAE5" stroke="#10B981" stroke-width="1"/>
+    <text x="440" y="60" text-anchor="middle" font-size="12" fill="#059669" font-family="sans-serif">node_modules/</text>
+    <rect x="400" y="78" width="100" height="22" rx="4" fill="#D1FAE5" stroke="#10B981" stroke-width="1"/>
+    <text x="450" y="93" text-anchor="middle" font-size="11" fill="#059669" font-family="sans-serif">pacote-A/ → store</text>
+    <line x1="440" y1="100" x2="440" y2="130" stroke="#86EFAC" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <text x="500" y="148" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">pacote-B NÃO aparece</text>
+    <text x="500" y="163" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">no node_modules raiz</text>
+    <text x="500" y="178" text-anchor="middle" font-size="10" fill="#059669" font-family="sans-serif">✓ acesso não autorizado = erro</text>
+
+    <!-- Arrow -->
+    <text x="335" y="105" text-anchor="middle" font-size="20" fill="#CBD5E1" font-family="sans-serif">→</text>
+  `;
+  svg.innerHTML = html;
+}
+
+// ─── SVG Lockfile Fragmentation ───────────────────────────────────────────────
+function drawLockfileFrag() {
+  const svg = document.getElementById('lockfile-frag-svg');
+  if (!svg) return;
+
+  const versions = [
+    { x: 60,  label: 'NPM v6', lock: 'lock v1', color: '#94A3B8' },
+    { x: 220, label: 'NPM v7', lock: 'lock v2', color: '#F59E0B' },
+    { x: 380, label: 'NPM v9', lock: 'lock v3', color: '#EF4444' },
+    { x: 540, label: 'NPM v10',lock: 'lock v3', color: '#EF4444' },
+  ];
+
+  let html = `<line x1="30" y1="65" x2="630" y2="65" stroke="#E2E8F0" stroke-width="2"/>`;
+
+  versions.forEach((v, i) => {
+    html += `<circle cx="${v.x}" cy="65" r="18" fill="${v.color}" stroke="white" stroke-width="2"/>`;
+    html += `<text x="${v.x}" y="70" text-anchor="middle" font-size="10" fill="white" font-weight="700" font-family="sans-serif">${v.label.split(' ')[1]}</text>`;
+    html += `<text x="${v.x}" y="100" text-anchor="middle" font-size="12" fill="${v.color}" font-weight="700" font-family="sans-serif">${v.label}</text>`;
+    html += `<text x="${v.x}" y="118" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">${v.lock}</text>`;
+    if (i < versions.length - 1) {
+      html += `<line x1="${v.x + 20}" y1="65" x2="${versions[i+1].x - 20}" y2="65" stroke="${v.color}" stroke-width="2" marker-end="url(#arr)"/>`;
+    }
+  });
+
+  const warning = `<rect x="140" y="130" width="380" height="26" rx="6" fill="#FFF7ED" stroke="#F59E0B" stroke-width="1.5"/>
+    <text x="330" y="147" text-anchor="middle" font-size="12" fill="#92400E" font-family="sans-serif">⚠ Diferentes versões do NPM geram conflitos frequentes no lockfile</text>`;
+
+  html += warning;
+  svg.innerHTML = `<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/></marker></defs>` + html;
+}
+
+// ─── SVG Yarn Fragmentation ───────────────────────────────────────────────────
+function drawYarnFrag() {
+  const svg = document.getElementById('yarn-frag-svg');
+  if (!svg) return;
+
+  svg.innerHTML = `
+    <rect x="10"  y="20" width="160" height="90" rx="8" fill="${YARN_C}22" stroke="${YARN_C}" stroke-width="1.5"/>
+    <text x="90"  y="44" text-anchor="middle" font-size="13" font-weight="700" fill="${YARN_C}" font-family="sans-serif">Yarn v1 (Classic)</text>
+    <text x="90"  y="64" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">Mantido, sem novas</text>
+    <text x="90"  y="80" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">features. Modo legado.</text>
+    <text x="90"  y="98" text-anchor="middle" font-size="11" fill="${YARN_C}" font-family="sans-serif">yarn.lock clássico</text>
+
+    <text x="195" y="70" text-anchor="middle" font-size="22" fill="#CBD5E1" font-family="sans-serif">↘</text>
+
+    <rect x="220" y="20" width="180" height="90" rx="8" fill="${YARN_C}22" stroke="${YARN_C}" stroke-width="1.5"/>
+    <text x="310" y="44" text-anchor="middle" font-size="13" font-weight="700" fill="${YARN_C}" font-family="sans-serif">Yarn v2/v3/v4 (Berry)</text>
+    <text x="310" y="64" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">Reescrita completa.</text>
+    <text x="310" y="80" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">PnP, ZeroInstalls</text>
+    <text x="310" y="98" text-anchor="middle" font-size="11" fill="#EF4444" font-family="sans-serif">Incompatível com v1</text>
+
+    <rect x="420" y="40" width="220" height="44" rx="6" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.5"/>
+    <text x="530" y="58" text-anchor="middle" font-size="12" fill="#EF4444" font-weight="700" font-family="sans-serif">⚠ Dois ecossistemas</text>
+    <text x="530" y="76" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">paralelos e incompatíveis</text>
+  `;
+}
+
+// ─── SVG Hard Links ────────────────────────────────────────────────────────────
+function drawHardLinks() {
+  const svg = document.getElementById('hardlink-svg');
+  if (!svg) return;
+
+  svg.innerHTML = `
+    <!-- Store -->
+    <rect x="10" y="20" width="150" height="160" rx="8" fill="#FFFBEB" stroke="${PNPM_C}" stroke-width="2"/>
+    <text x="85" y="44" text-anchor="middle" font-size="12" font-weight="700" fill="#92400E" font-family="sans-serif">PNPM Store Global</text>
+    <text x="85" y="62" text-anchor="middle" font-size="10" fill="#64748B" font-family="sans-serif">~800 MB total</text>
+    <rect x="22" y="72"  width="126" height="22" rx="4" fill="${PNPM_C}33" stroke="${PNPM_C}" stroke-width="1"/>
+    <text x="85" y="87"  text-anchor="middle" font-size="10" fill="#92400E" font-family="sans-serif">react@18.3.0 (1×)</text>
+    <rect x="22" y="100" width="126" height="22" rx="4" fill="${PNPM_C}33" stroke="${PNPM_C}" stroke-width="1"/>
+    <text x="85" y="115" text-anchor="middle" font-size="10" fill="#92400E" font-family="sans-serif">typescript@5.4.0 (1×)</text>
+    <rect x="22" y="128" width="126" height="22" rx="4" fill="${PNPM_C}33" stroke="${PNPM_C}" stroke-width="1"/>
+    <text x="85" y="143" text-anchor="middle" font-size="10" fill="#92400E" font-family="sans-serif">zod@3.22.0 (1×)</text>
+    <text x="85" y="170" text-anchor="middle" font-size="10" fill="#059669" font-family="sans-serif">✓ sem duplicatas</text>
+
+    <!-- Projects -->
+    ${[0,1,2].map(i => {
+      const px = 240 + i * 140;
+      const py = 40 + (i % 2) * 40;
+      return `
+        <rect x="${px}" y="${py}" width="120" height="60" rx="6" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+        <text x="${px+60}" y="${py+22}" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B" font-family="sans-serif">projeto-${String.fromCharCode(65+i)}/</text>
+        <text x="${px+60}" y="${py+40}" text-anchor="middle" font-size="10" fill="#64748B" font-family="sans-serif">node_modules →</text>
+        <text x="${px+60}" y="${py+54}" text-anchor="middle" font-size="10" fill="${PNPM_C}" font-family="sans-serif">hard links</text>
+        <line x1="160" y1="100" x2="${px}" y2="${py+30}" stroke="${PNPM_C}" stroke-width="1.5" stroke-dasharray="5,3"/>
+      `;
+    }).join('')}
+
+    <!-- Label -->
+    <text x="340" y="185" text-anchor="middle" font-size="11" fill="#64748B" font-family="sans-serif">Cada pacote existe uma vez no disco — projetos usam hard links</text>
+  `;
+}
+
+// ─── SVG Lockfile Why ──────────────────────────────────────────────────────────
+function drawLockfileWhy() {
+  const svg = document.getElementById('lockfile-why-svg');
+  if (!svg) return;
+
+  svg.innerHTML = `
+    <!-- Sem lockfile -->
+    <rect x="10" y="10" width="295" height="185" rx="8" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.5"/>
+    <text x="157" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="${NPM_C}" font-family="sans-serif">❌ Sem lockfile versionado</text>
+    <text x="157" y="58" text-anchor="middle" font-size="12" fill="#EF4444" font-family="sans-serif">Dev A (Jan) → lodash@4.17.20</text>
+    <text x="157" y="78" text-anchor="middle" font-size="12" fill="#EF4444" font-family="sans-serif">Dev B (Mar) → lodash@4.17.21</text>
+    <text x="157" y="98" text-anchor="middle" font-size="12" fill="#EF4444" font-family="sans-serif">CI     (Mar) → lodash@4.17.21</text>
+    <line x1="30" y1="110" x2="280" y2="110" stroke="#FCA5A5" stroke-width="1"/>
+    <text x="157" y="130" text-anchor="middle" font-size="11" fill="#92400E" font-family="sans-serif">⚠ Comportamento divergente</text>
+    <text x="157" y="148" text-anchor="middle" font-size="11" fill="#92400E" font-family="sans-serif">⚠ "Funciona na minha máquina"</text>
+    <text x="157" y="166" text-anchor="middle" font-size="11" fill="#92400E" font-family="sans-serif">⚠ CVEs entram silenciosamente</text>
+    <text x="157" y="184" text-anchor="middle" font-size="11" fill="#92400E" font-family="sans-serif">⚠ Rollback impossível</text>
+
+    <!-- Com lockfile -->
+    <rect x="375" y="10" width="295" height="185" rx="8" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5"/>
+    <text x="522" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#059669" font-family="sans-serif">✅ Com lockfile versionado</text>
+    <text x="522" y="58" text-anchor="middle" font-size="12" fill="#059669" font-family="sans-serif">Dev A (Jan) → lodash@4.17.20</text>
+    <text x="522" y="78" text-anchor="middle" font-size="12" fill="#059669" font-family="sans-serif">Dev B (Mar) → lodash@4.17.20</text>
+    <text x="522" y="98" text-anchor="middle" font-size="12" fill="#059669" font-family="sans-serif">CI     (Mar) → lodash@4.17.20</text>
+    <line x1="395" y1="110" x2="655" y2="110" stroke="#86EFAC" stroke-width="1"/>
+    <text x="522" y="130" text-anchor="middle" font-size="11" fill="#059669" font-family="sans-serif">✓ Ambiente reproduzível</text>
+    <text x="522" y="148" text-anchor="middle" font-size="11" fill="#059669" font-family="sans-serif">✓ Upgrades conscientes e rastreáveis</text>
+    <text x="522" y="166" text-anchor="middle" font-size="11" fill="#059669" font-family="sans-serif">✓ Rollback trivial via git revert</text>
+    <text x="522" y="184" text-anchor="middle" font-size="11" fill="#059669" font-family="sans-serif">✓ CVEs detectados em PR review</text>
+
+    <text x="340" y="105" text-anchor="middle" font-size="22" fill="#CBD5E1" font-family="sans-serif">→</text>
+  `;
+}
+
+// ─── Init all charts ──────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function () {
+
+  // Timeline
+  drawTimeline();
+
+  // Phantom deps
+  drawPhantom();
+
+  // Lockfile fragmentation
+  drawLockfileFrag();
+
+  // Yarn fragmentation
+  drawYarnFrag();
+
+  // Hard links
+  drawHardLinks();
+
+  // Lockfile why
+  drawLockfileWhy();
+
+  // Downloads
+  drawHBars('chart-downloads', [
+    { label: 'NPM',  value: 35, color: NPM_C  },
+    { label: 'Yarn', value: 12, color: YARN_C },
+    { label: 'PNPM', value: 8,  color: PNPM_C },
+  ], 40, 'B', ' downloads/semana');
+
+  // Growth
+  drawHBars('chart-growth', [
+    { label: 'PNPM', value: 620, color: PNPM_C },
+    { label: 'NPM',  value: 180, color: NPM_C  },
+    { label: 'Yarn', value: 45,  color: YARN_C },
+  ], 700, '%', ' crescimento');
+
+  // Install cold
+  drawHBars('chart-cold', [
+    { label: 'NPM',  value: 29, color: NPM_C  },
+    { label: 'Yarn', value: 23, color: YARN_C },
+    { label: 'PNPM', value: 18, color: PNPM_C },
+  ], 35, 's');
+
+  // Install warm
+  drawHBars('chart-warm', [
+    { label: 'NPM',  value: 12, color: NPM_C  },
+    { label: 'Yarn', value: 6,  color: YARN_C },
+    { label: 'PNPM', value: 4,  color: PNPM_C },
+  ], 15, 's');
+
+  // Disk usage
+  drawHBars('chart-disk', [
+    { label: 'NPM',  value: 2.8, color: NPM_C  },
+    { label: 'Yarn', value: 2.1, color: YARN_C },
+    { label: 'PNPM', value: 0.8, color: PNPM_C },
+  ], 3.5, ' GB');
+
+  // Final score
+  drawHBars('chart-final', [
+    { label: 'PNPM', value: 4.85, color: PNPM_C },
+    { label: 'Yarn', value: 3.40, color: YARN_C },
+    { label: 'NPM',  value: 2.95, color: NPM_C  },
+  ], 5.0, '/5.00');
+
+  // Radar
+  drawRadar('chart-radar');
+});
+</script>
+</body>
+</html>
